@@ -1,4 +1,4 @@
-# Rossmann Store Sales — Predicting Daily Sales to Make Smarter Staffing Decisions
+# Rossmann Store Sales: Predicting Daily Sales to Make Smarter Staffing Decisions
 **MSE 433 Final Project | Yusur Araim | University of Waterloo**
 
 ---
@@ -139,7 +139,7 @@ The two most important features by far were `Lag1` (yesterday's sales, **37.6%**
 
 | File | Description |
 |---|---|
-| `Final Project Yusur MSE 433(1).ipynb` | Full notebook with all code, markdown explanations, charts, and outputs |
+| `Final Project Yusur MSE 433 (1).ipynb` | Full notebook with all code, markdown explanations, charts, and outputs |
 | `train.csv` | Daily sales data (download from Kaggle — not included due to file size) |
 | `store.csv` | Store metadata (download from Kaggle — not included due to file size) |
 
@@ -153,7 +153,7 @@ The two most important features by far were `Lag1` (yesterday's sales, **37.6%**
    ```
    pip install pandas numpy matplotlib seaborn scikit-learn
    ```
-4. Open `Final Project Yusur MSE 433(1).ipynb` and run all cells top to bottom in order
+4. Open `Final Project Yusur MSE 433 (1).ipynb` and run all cells top to bottom in order
 
 ---
 
