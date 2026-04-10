@@ -1,19 +1,21 @@
-# Rossmann Store Sales — Sales Prediction & Staffing Decision Support
+# Rossmann Store Sales — Predicting Daily Sales to Make Smarter Staffing Decisions
 **MSE 433 Final Project | Yusur Araim | University of Waterloo**
 
 ---
 
 ## Overview
 
-Retail managers face a daily challenge — they have to decide how many staff to schedule without knowing exactly how busy the store will be. Schedule too many and you waste money on wages. Schedule too few and customers wait too long, which hurts the store's reputation. Most stores either rely on gut feeling or use the same fixed number every day, neither of which accounts for the natural variation in demand caused by promotions, holidays, day of the week, and seasonal patterns.
+Retail managers have to make a decision every day: how many staff should be scheduled? The problem is that they don’t actually know how busy the store will be. If they schedule too many people, they waste money on wages. If they schedule too few, customers wait longer and service gets worse.
 
-This project tackles that problem using machine learning. Using three years of real daily sales data from Rossmann stores across Germany (2013–2015), I built a system that predicts how much a store will sell each day and then translates that prediction directly into a staffing recommendation. What makes this different from a standard forecasting project is the decision-making step at the end — the predictions are not just numbers, they are turned into an actionable output that a store manager could actually use.
+Most stores either rely on experience or use the same schedule every day, but that doesn’t account for things like promotions, holidays, or weekly patterns.
+
+This project tries to solve that by using data. I used real sales data from Rossmann stores to predict how much a store will sell each day, and then turn that prediction into a staffing recommendation. The main difference from a typical forecasting project is that the output is actually usable, not just a number, but a decision.
 
 ---
 
 ## Problem Statement
 
-The goal is not just to predict sales accurately, but to use those predictions to answer a practical question: **how many staff should be scheduled today?** This involves two layers of decision making:
+The goal is not just to predict sales accurately, but to use those predictions to answer a practical question: how many staff should be scheduled today? This involves two types of decision making:
 
 1. Predicting the expected sales level for a given store on a given day
 2. Accounting for uncertainty — on days where the model is less confident, an extra buffer staff member is added to avoid being caught understaffed on an unexpectedly busy day
@@ -24,12 +26,12 @@ The goal is not just to predict sales accurately, but to use those predictions t
 
 The project uses the [Rossmann Store Sales dataset from Kaggle](https://www.kaggle.com/competitions/rossmann-store-sales), which contains:
 
-- Daily sales records for **1,115 stores** over roughly 2.5 years (2013–2015)
-- Over **1 million rows** of data after merging store and sales files
+- Daily sales records for 1,115 stores over roughly 2.5 years (2013–2015)
+- Over 1 million rows of data after merging store and sales files
 - Key variables including promotions, school holidays, state holidays, store type, assortment type, and competition distance
 - A separate store metadata file with store-level characteristics
 
-The data was filtered to only include days when stores were open and had real sales, leaving around **844,000 rows**. After adding lag and rolling features (which require historical data to calculate), the final modelling dataset had around **404,000 rows**.
+The data was filtered to only include days when stores were open and had real sales, leaving around 844,000 rows. After adding lag and rolling features (which require historical data to calculate), the final modelling dataset had around 404,000 rows.
 
 ---
 
@@ -57,22 +59,22 @@ These features are critical because retail demand is heavily driven by recent hi
 
 ### Train / Test Split
 
-The data was split **temporally** — the first 80% of dates were used for training and the most recent 20% for testing. The split date was **10 February 2015**, giving 323,169 training rows and 80,747 test rows. This mirrors how the model would actually work in production: always training on the past and predicting the future.
+The data was split temprorality the first 80% of dates were used for training and the most recent 20% for testing. The split date was 10 February 2015, giving 323,169 training rows and 80,747 test rows. This mirrors how the model would actually work in production: always training on the past and predicting the future.
 
 ### Models
 
 Two models were built and compared:
 
-**Linear Regression (baseline)**
+Linear Regression (baseline)
 A simple model that fits a straight line through the features. Used as a benchmark to check whether a more complex model is actually worth the added complexity.
 
 **Quantile Gradient Boosting (main model)**
 Gradient Boosting builds an ensemble of decision trees where each tree corrects the errors of the previous one. The quantile version was trained three times:
-- At the **10th percentile** — an optimistic lower bound
-- At the **50th percentile** — the point prediction (median)
-- At the **90th percentile** — a pessimistic upper bound
+- At the **10th percentile: lower bound
+- At the 50th percentile: the point prediction (median)
+- At the 90th percentile:  upper bound
 
-The gap between the 10th and 90th percentile forms an **80% prediction interval** that captures how uncertain the model is on any given day.
+The gap between the 10th and 90th percentile forms an 80% prediction interval that captures how uncertain the model is on any given day.
 
 ### Staffing Decision Rules
 
@@ -80,17 +82,17 @@ The staffing recommendation works as follows:
 
 1. Divide the predicted sales (50th percentile) by the sales-per-staff threshold to get a base staff count
 2. Clip the result between a minimum of 3 and a maximum of 12 staff
-3. If the **relative uncertainty** (interval width ÷ median prediction) exceeds 0.6, add one buffer staff member
+3. If the relative uncertainty (interval width ÷ median prediction) exceeds 0.6, add one buffer staff member
 4. Flag an inventory action based on the predicted demand tier (standard / monitor / restock)
 
-The sales-per-staff threshold was derived from the dataset itself using the `Customers` column, rather than being an assumed number. The median sales per customer (€9.25) multiplied by 60 customers per staff member (a standard retail industry benchmark) gives a threshold of approximately **€555 per staff member per day**.
+The sales-per-staff threshold was derived from the dataset itself using the `Customers` column, rather than being an assumed number. The median sales per customer (€9.25) multiplied by 60 customers per staff member (a standard retail industry benchmark) gives a threshold of approximately €555 per staff member per day.
 
 ### Cost Analysis
 
 To evaluate whether the model's staffing decisions are actually better in practice, a simple cost model was built:
 
-- **Overstaffing cost** = extra staff × €120 per day (estimated daily wage)
-- **Understaffing cost** = missing staff × €555 × 20% (estimated lost sales from being short-staffed)
+- Overstaffing cost = extra staff × €120 per day (estimated daily wage)
+- Understaffing cost = missing staff × €555 × 20% (estimated lost sales from being short-staffed)
 
 The model's staffing schedule was compared against a **fixed baseline** that always schedules the data-derived average of 10 staff per day, regardless of forecast.
 
@@ -152,9 +154,7 @@ The two most important features by far were `Lag1` (yesterday's sales, **37.6%**
    ```
    pip install pandas numpy matplotlib seaborn scikit-learn
    ```
-4. Open `Final Project Yusur MSE 433.ipynb` and run all cells top to bottom in order
-
-Alternatively, open `Final Project Yusur MSE 433.html` in any browser to view all outputs and charts without running anything.
+4. Open `Final Project Yusur MSE 433(1).ipynb` and run all cells top to bottom in order
 
 ---
 
